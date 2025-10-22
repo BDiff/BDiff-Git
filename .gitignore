@@ -1,0 +1,7 @@
+private-key.pem
+.idea
+__pycache__
+html
+bdiff_files
+bdiff_html
+venv

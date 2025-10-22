@@ -1,0 +1,9 @@
+Levenshtein==0.23.0
+munkres==1.1.4
+argparse==1.4.0
+cryptography
+requests~=2.32.3
+beautifulsoup4~=4.12.3
+numpy==1.26.4
+scipy==1.15.2
+myers==1.0.1
