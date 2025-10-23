@@ -4,19 +4,18 @@
 本项目会在git
 ```
 git clone
+cd bdiff-git  #当前项目地址
+pip install -r requirements.txt
+```
 
-cd bdiff  #当前项目地址
-
+如果环境存在问题则：
+```
 # 在项目目录创建 venv
 python3 -m venv .venv
 
 #激活虚拟环境
 source .venv/bin/activate
-   
-mkdir bdiff_files &&  mkdir bdiff_html
 
-echo "\nbdiff_files" >> .gitignore && echo "\nbdiff_html" >> .gitignore
-pip install -r requirements.txt
 ```
 
 ### 配置git difftool 命令
@@ -34,8 +33,14 @@ git config --global difftool.prompt false
 
 ```
 
-在仓库下执行
+### 使用
+在某个代码仓库下执行
+
 ```
+cd xxxxx 
+#屏蔽目录(在项目目录下执行，不影响 git 仓库)
+echo "bdiff_files/" >> .git/info/exclude  
+
 git difftool 
 ```
 
