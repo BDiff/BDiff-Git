@@ -2,11 +2,24 @@
 import os
 from bs4 import BeautifulSoup
 from BDiff_Myers import BDiff
-import asyncio
 import sys
 
+# 目录配置
+UPLOADS_DIR = "bdiff_files"
+SRC_DIR = os.path.join(UPLOADS_DIR, "src")
+DEST_DIR = os.path.join(UPLOADS_DIR, "dest")
+HTML_DIR = os.path.abspath(os.path.join(UPLOADS_DIR, "html"))
+INDEX_FILE = os.path.join(HTML_DIR, "index.html")
 
-def save_file(filename, content, output_path="html"):
+
+def ensure_dirs():
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    os.makedirs(HTML_DIR, exist_ok=True)
+    os.makedirs(SRC_DIR, exist_ok=True)
+    os.makedirs(DEST_DIR, exist_ok=True)
+
+
+def save_file(filename, content, output_path=HTML_DIR):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     filepath = os.path.join(output_path, filename)

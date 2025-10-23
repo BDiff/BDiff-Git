@@ -4,23 +4,7 @@ import shutil
 import sys
 import webbrowser
 import time
-from output_html import run
-import pkg_resources
-# 目录配置
-UPLOADS_DIR = "bdiff_files"
-SRC_DIR = os.path.join(UPLOADS_DIR, "src")
-DEST_DIR = os.path.join(UPLOADS_DIR, "dest")
-HTML_DIR = os.path.abspath(os.path.join(UPLOADS_DIR, "html"))
-INDEX_FILE = os.path.join(HTML_DIR, "index.html")
-
-
-
-
-def ensure_dirs():
-    os.makedirs(UPLOADS_DIR, exist_ok=True)
-    os.makedirs(HTML_DIR, exist_ok=True)
-    os.makedirs(SRC_DIR, exist_ok=True)
-    os.makedirs(DEST_DIR, exist_ok=True)
+from output_html import run, INDEX_FILE, HTML_DIR, ensure_dirs, SRC_DIR, DEST_DIR
 
 
 def update_index(html_file, display_name):
