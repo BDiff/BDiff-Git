@@ -26,7 +26,8 @@ pip install -r requirements.txt
 git config --global diff.tool bdiff
 
 注意：/path/to/bdiff/diff.py 替换为脚本的实际路径
-git config --global difftool.bdiff.cmd  '/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/feng/NUDT/bdiff/diff.py "$LOCAL" "$REMOTE"'
+/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 替换为您的 python 环境
+git config --global difftool.bdiff.cmd  '/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /path/to/bdiff/diff.py "$LOCAL" "$REMOTE"'
 git config --global difftool.prompt false
 
 ```
@@ -35,4 +36,6 @@ git config --global difftool.prompt false
 ```
 git difftool 
 ```
+git config --global difftool.bdiff.cmd  '/Library/Frameworks/Python.framework/Versions/3.12/bin/python3 /Users/feng/NUDT/bdiff-git/diff.py "$LOCAL" "$REMOTE"'
+
 

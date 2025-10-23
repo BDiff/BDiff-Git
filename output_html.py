@@ -45,11 +45,9 @@ def run(src, dest, output_name=''):
         src_lines = f.read().splitlines()
     with open(dest, 'r', encoding='utf-8') as f:
         dest_lines = f.read().splitlines()
-    print("asyc start")
     print("Python version:", sys.version)
     print("Python executable:", sys.executable)
-    edit_scripts = asyncio.run(BDiff(os.path.abspath(src), os.path.abspath(dest), src_lines, dest_lines))
-    print("asyc end")
+    edit_scripts = BDiff(os.path.abspath(src), os.path.abspath(dest), src_lines, dest_lines)
     print(edit_scripts)
     print(output_name)
     soup = get_html_template()

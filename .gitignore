@@ -5,3 +5,5 @@ html
 bdiff_files
 bdiff_html
 venv
+.venv
+.venvsource
