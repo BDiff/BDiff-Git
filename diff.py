@@ -5,13 +5,15 @@ import sys
 import webbrowser
 import time
 from output_html import run
-
+import pkg_resources
 # 目录配置
 UPLOADS_DIR = "bdiff_files"
 SRC_DIR = os.path.join(UPLOADS_DIR, "src")
 DEST_DIR = os.path.join(UPLOADS_DIR, "dest")
 HTML_DIR = os.path.abspath(os.path.join(UPLOADS_DIR, "html"))
 INDEX_FILE = os.path.join(HTML_DIR, "index.html")
+
+
 
 
 def ensure_dirs():
@@ -76,7 +78,7 @@ def main():
     html_file = os.path.join(HTML_DIR, base_name)
 
     # 生成单文件 diff HTML
-    print("生成单文件 diff HTML=========================")
+    print("生成单文件 diff HTML=========================" + html_file)
     html_file_path = run(saved_local_path, saved_remote_path, output_name=html_file)
     print(f"Diff HTML generated: {html_file_path}")
 

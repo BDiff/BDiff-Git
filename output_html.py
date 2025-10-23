@@ -17,7 +17,12 @@ def save_file(filename, content, output_path="html"):
 
 
 def get_html_template():
-    with open('index.html', 'r', encoding='utf-8') as f:
+    # 1️⃣ 当前 diff.py 所在目录（无论从哪执行都正确）
+    current_dir = os.path.abspath(os.path.dirname(__file__))
+    # 2️⃣ index.html 与 diff.py 同级
+    index_file = os.path.join(current_dir, "index.html")
+
+    with open(index_file, 'r', encoding='utf-8') as f:
         return BeautifulSoup(f.read(), 'html.parser')
 
 
