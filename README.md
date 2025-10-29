@@ -18,19 +18,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-
-
-
-# bdiff git difftool配置
-### 环境配置
-本项目采用Python 3.12.10 ,如果命令行使用的是python3和pip3 ,请将下列Python与pip指令换成相应的指令
-本项目会在git
-```
-git clone
-cd bdiff-git  #当前项目地址
-pip install -r requirements.txt
-```
-
 ### Configure git difftool Command
 Execute it via Python (recommended method).
 ```
@@ -45,8 +32,6 @@ git config --global difftool.prompt false
 ```
 
 ### Usage
-
-在某个代码仓库下执行
 Run the following commands in a code repository:
 ```
 cd xxxxx 
