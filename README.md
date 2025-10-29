@@ -1,3 +1,26 @@
+# bdiff git difftool Configuration
+
+### Environment Setup
+This project uses Python 3.12.10. If your command line uses `python3` and `pip3`, replace the following Python and pip commands with the corresponding ones.
+
+```bash
+git clone <repository-url>
+cd bdiff-git  # Current project directory
+pip install -r requirements.txt
+```
+
+If you encounter environment issues:
+```
+# Create a virtual environment in the project directory
+python3 -m venv .venv
+
+# Activate the virtual environment
+source .venv/bin/activate
+```
+
+
+
+
 # bdiff git difftool配置
 ### 环境配置
 本项目采用Python 3.12.10 ,如果命令行使用的是python3和pip3 ,请将下列Python与pip指令换成相应的指令
@@ -8,40 +31,27 @@ cd bdiff-git  #当前项目地址
 pip install -r requirements.txt
 ```
 
-如果环境存在问题则：
-```
-# 在项目目录创建 venv
-python3 -m venv .venv
-
-#激活虚拟环境
-source .venv/bin/activate
-
-```
-
-### 配置git difftool 命令
-调用 Python 来执行它（推荐方式）。
-
+### Configure git difftool Command
+Execute it via Python (recommended method).
 ```
 git config --global diff.tool bdiff
 
-注意：注意：注意：
-/path/to/bdiff/diff.py 替换为脚本的实际路径
-/path/to/python3 替换为python 环境
+NOTE: NOTE: NOTE:
+Replace /path/to/bdiff/diff.py with the actual path to the script
+Replace /path/to/python3 with your Python environment path
 
 git config --global difftool.bdiff.cmd  '/path/to/python3 /path/to/bdiff/diff.py "$LOCAL" "$REMOTE"'
 git config --global difftool.prompt false
-
 ```
 
-### 使用
-在某个代码仓库下执行
+### Usage
 
+在某个代码仓库下执行
+Run the following commands in a code repository:
 ```
 cd xxxxx 
-#屏蔽目录(在项目目录下执行，不影响 git 仓库)
+# Exclude directory (run in the project directory, no impact on the git repository)
 echo "bdiff_files/" >> .git/info/exclude  
 
 git difftool 
 ```
-
-
