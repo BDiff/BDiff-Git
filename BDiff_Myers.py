@@ -6,33 +6,8 @@ import copy
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 import myers
+from rapidfuzz import fuzz
 
-
-# Levenshtein_ratio
-def levenshtein_ratio(s1, s2):
-    if len(s1) == 0 and len(s2) == 0:
-        return 1.0
-
-    # 初始化动态规划表
-    dp = np.zeros((len(s1) + 1, len(s2) + 1), dtype=float)
-    for i in range(len(s1) + 1):
-        dp[i, 0] = i * 1.0  # 删除代价
-    for j in range(len(s2) + 1):
-        dp[0, j] = j * 1.0  # 插入代价
-
-    # 填充DP表
-    for i in range(1, len(s1) + 1):
-        for j in range(1, len(s2) + 1):
-            cost = 0 if s1[i - 1] == s2[j - 1] else 2.0
-            dp[i, j] = min(
-                dp[i - 1, j] + 1,  # 删除
-                dp[i, j - 1] + 1,  # 插入
-                dp[i - 1, j - 1] + cost  # 替换
-            )
-
-    distance = dp[len(s1), len(s2)]
-    total_length = len(s1) + len(s2)
-    return (total_length - distance) / total_length
 
 
 # 多匹配更新时的筛选时，同交点数随意删除可能使得筛掉的进入km算法被筛掉
@@ -50,7 +25,7 @@ def W_BESTI_LINE(src_line_no, dest_line_no, src_lines, dest_lines, ctx_length=4,
     elif not src_lines[src_line_no - 1] or not dest_lines[dest_line_no - 1]:
         return False, 0
     else:
-        line_sim = levenshtein_ratio(src_lines[src_line_no - 1].strip(), dest_lines[dest_line_no - 1].strip())
+        line_sim = fuzz.ratio(src_lines[src_line_no - 1].strip(), dest_lines[dest_line_no - 1].strip())
     if src_line_no <= ctx_length:
         src_upper_ctx = src_lines[:src_line_no - 1]
     else:
@@ -76,43 +51,6 @@ def W_BESTI_LINE(src_line_no, dest_line_no, src_lines, dest_lines, ctx_length=4,
     return True if synthetic_sim >= sim_threshold else False, round(synthetic_sim, 3)
 
 
-def is_line_change(src_line_no, dest_line_no, src_lines, dest_lines, ctx_length=4, line_sim_threshold=0.6,
-                   sim_threshold=0.5):
-    # sim = line_sim * 0.6 + context_sim * 0.4
-    # 先匹配相等，
-    src_ctx, dest_ctx = "", ""
-    src_index, src_length = src_line_no - 2, len(src_lines)
-    i = 0
-    while i < ctx_length and src_index >= 0:
-        if src_lines[src_index].strip() != '':
-            src_ctx = src_lines[src_index] + src_ctx
-            i += 1
-        src_index -= 1
-    i = 0
-    src_index = src_line_no
-    while i < ctx_length and src_index < src_length:
-        if src_lines[src_index].strip() != '':
-            src_ctx = src_ctx + src_lines[src_index]
-            i += 1
-        src_index += 1
-    j = 0
-    dest_index, dest_length = dest_line_no - 2, len(dest_lines)
-    while j < ctx_length and dest_index >= 0:
-        if dest_lines[dest_index].strip() != '':
-            dest_ctx = dest_lines[dest_index] + dest_ctx
-            j += 1
-        dest_index -= 1
-    j = 0
-    dest_index = dest_line_no
-    while j < ctx_length and dest_index < dest_length:
-        if dest_lines[dest_index].strip() != '':
-            dest_ctx = dest_ctx + dest_lines[dest_index]
-            j += 1
-        dest_index += 1
-    ctx_sim = levenshtein_ratio(src_ctx, dest_ctx)
-    line_sim = levenshtein_ratio(src_lines[src_line_no - 1], dest_lines[dest_line_no - 1])
-    sim = line_sim * line_sim_threshold + ctx_sim * (1 - line_sim_threshold)
-    return True if sim >= sim_threshold else False, sim
 
 def construct_line_data(diffs, indent_tabs_size):
     hunks, hunk_dels, hunk_adds = [], [], []
@@ -311,7 +249,7 @@ def mapping_block_move(src_lines, added_lines, src_all_lines, dest_all_lines, mi
             while cur_src_line_no in src_lines and cur_added_line_no in added_lines and src_lines[cur_src_line_no][
                 2] == src_mode and (src_lines[cur_src_line_no][0] == added_lines[cur_added_line_no][0] or (
                     src_lines[cur_src_line_no][0] != added_lines[cur_added_line_no][0] and count_mv_block_update and
-                    levenshtein_ratio(src_lines[cur_src_line_no][0], added_lines[cur_added_line_no][0]) >= 0.6)) and (
+                    fuzz.ratio(src_lines[cur_src_line_no][0], added_lines[cur_added_line_no][0]) >= 0.6)) and (
                     (added_lines[cur_added_line_no][0] != "" and added_lines[cur_added_line_no][1][0] -
                      src_lines[cur_src_line_no][1][0] == indent_diff) or added_lines[cur_added_line_no][0] == ""):
                 if count_mv_block_update and src_lines[cur_src_line_no][0] != added_lines[cur_added_line_no][0]:
@@ -396,7 +334,7 @@ def mapping_block_copy(src_lines, added_lines, src_all_lines, dest_all_lines, mi
                     (src_lines[cur_src_line_no][0] == added_lines[cur_added_line_no][0] or (
                             src_lines[cur_src_line_no][0] != added_lines[cur_added_line_no][
                         0] and count_cp_block_update and
-                            levenshtein_ratio(src_lines[cur_src_line_no][0],
+                            fuzz.ratio(src_lines[cur_src_line_no][0],
                                               added_lines[cur_added_line_no][0]) >= 0.6)) and (
                     (added_lines[cur_added_line_no][0] != "" and added_lines[cur_added_line_no][
                         1][0] - src_lines[cur_src_line_no][1][0] == indent_diff) or added_lines[cur_added_line_no][
@@ -472,7 +410,7 @@ def context_similarity(src_start, dest_start, block, src_lines, dest_lines):
     # 参考LHDiff
     src_context = construct_context(src_start, block, src_lines)
     dest_context = construct_context(dest_start, block, dest_lines)
-    return levenshtein_ratio(src_context, dest_context)
+    return fuzz.ratio(src_context, dest_context)
 
 
 def construct_context(start, block_length, lines):
@@ -1537,26 +1475,70 @@ def myers_diff(src, dest):
         right_lines = [line.rstrip() for line in rf]
     return myers.diff(left_lines, right_lines)
 
-def BDiff(src, dest, src_lines_list, dest_lines_list, diff_algorithm="Histogram", indent_tabs_size=4,
-          min_move_block_length=2, min_copy_block_length=2, ctx_length=4, line_sim_weight=0.6,
-          sim_threshold=0.5, max_merge_lines=8, max_split_lines=8, pure_mv_block_contain_punc=False,
-          pure_cp_block_contain_punc=False, count_mv_block_update=True, count_cp_block_update=True, identify_move=True,
-          identify_copy=True, identify_update=True, identify_split=True, identify_merge=True):
-    # edit effort: move、copy后有缩进+1，有n行update就+n
-    # update: 1
-    # move: 2
-    # copy: 4
-    # 1）运行Myers算法：Myers.diff，得到编辑脚本以及带行号的增、减行：Myers.diff_line_no
+def bdiff(
+        src: str,
+        dest: str,
+        indent_tabs_size: int = 4,
+        min_move_block_length: int = 2,
+        min_copy_block_length: int = 2,
+        ctx_length: int = 4,
+        line_sim_weight: float = 0.6,
+        sim_threshold: float = 0.5,
+        max_merge_lines: int = 8,
+        max_split_lines: int = 8,
+        pure_mv_block_contain_punc: bool = False,
+        pure_cp_block_contain_punc: bool = False,
+        count_mv_block_update: bool = True,
+        count_cp_block_update: bool = True,
+        identify_move: bool = True,
+        identify_copy: bool = True,
+        identify_update: bool = True,
+        identify_split: bool = True,
+        identify_merge: bool = True
+) -> list[dict]:
+    """Main function to generate edit scripts between two files.
+
+    Args:
+        src: File path to the source file (original file for comparison)
+        dest: File path to the destination file (modified file for comparison)
+        diff_algorithm: Git diff algorithm to use for raw change detection ("Histogram" or "Myers", default: "Histogram")
+        indent_tabs_size: Number of spaces a tab character represents (for indentation calculation, default: 4)
+        min_move_block_length: Minimum number of lines required for a valid move block (default: 2)
+        min_copy_block_length: Minimum number of lines required for a valid copy block (default: 2)
+        ctx_length: Number of context lines (above/below target line) to use for similarity evaluation (default: 4)
+        line_sim_weight: Weight of line content similarity in synthetic similarity score (0-1, default: 0.6; complement is context weight)
+        sim_threshold: Minimum synthetic similarity score to qualify lines as "related" (0-1, default: 0.5)
+        max_merge_lines: Maximum number of source lines allowed for a valid merge operation (default: 8)
+        max_split_lines: Maximum number of destination lines allowed for a valid split operation (default: 8)
+        pure_mv_block_contain_punc: Whether move blocks can consist solely of punctuation lines (default: False)
+        pure_cp_block_contain_punc: Whether copy blocks can consist solely of punctuation lines (default: False)
+        count_mv_block_update: Whether to count line-level updates within move blocks (default: True)
+        count_cp_block_update: Whether to count line-level updates within copy blocks (default: True)
+        identify_move: Whether to enable detection of move operations (default: True)
+        identify_copy: Whether to enable detection of copy operations (default: True)
+        identify_update: Whether to enable detection of single-line update operations (default: True)
+        identify_split: Whether to enable detection of line split operations (default: True)
+        identify_merge: Whether to enable detection of line merge operations (default: True)
+
+    Returns:
+        list[dict]: Structured list of edit scripts. Each script dict contains:
+                    - "mode": Operation type (e.g., "move", "copy", "update", "split", "merge", "insert", "delete")
+                    - "src_line": 1-indexed start line in the source file (relevant for source-dependent ops like move/copy)
+                    - "dest_line": 1-indexed start line in the destination file (relevant for dest-dependent ops like insert/update)
+                    - "block_length": Number of lines in the operation (for block ops like move/copy/split/merge)
+                    - "edit_action": Human-readable description of the operation (e.g., "Move 3-line block from line 5 to line 12")
+                    - Additional mode-specific fields (e.g., "indent_offset" for indent changes, "updates" for line edits in blocks)
+    """
+    with open(src, 'r', encoding="utf8") as left_infile:
+        src_lines_list = left_infile.readlines()
+    with open(dest, 'r', encoding="utf8") as right_infile:
+        dest_lines_list = right_infile.readlines()
     env = os.environ.copy()
-    # os.chdir(r'/app')
-    # 将 /usr/bin 添加到 PATH 中，确保 git 命令可用
 
     env["PATH"] = "/usr/bin:" + env["PATH"]
     diffs = myers_diff(src, dest)
-    # 2）构建数据列表：construct_line_data
     src_lines, added_lines, diff_scripts, hunks = construct_line_data(diffs, indent_tabs_size)
     src_lines_copy = src_lines.copy()
-    # 3）先生成change的变更
     if added_lines:
         move_mappings, copy_mappings, splits, merges, update_mappings = [], [], [], [], []
         hunks_copy = copy.deepcopy(hunks)
@@ -1567,31 +1549,22 @@ def BDiff(src, dest, src_lines_list, dest_lines_list, diff_algorithm="Histogram"
         splits_merges = splits + merges
         if identify_move:
             move_mappings = mapping_block_move(src_lines, added_lines, src_lines_list, dest_lines_list,
-                                               min_move_block_length, diff_scripts, pure_mv_block_contain_punc,
+                                               min_move_block_length, diff_script, pure_mv_block_contain_punc,
                                                count_mv_block_update)
         if identify_copy:
             copy_mappings = mapping_block_copy(src_lines_copy, added_lines, src_lines_list, dest_lines_list,
-                                               min_copy_block_length, hunks, diff_scripts, pure_cp_block_contain_punc,
+                                               min_copy_block_length, hunks, diff_script, pure_cp_block_contain_punc,
                                                count_cp_block_update)
         if identify_update:
             update_mappings = mapping_line_update(src_lines_list, dest_lines_list, hunks, ctx_length, line_sim_weight,
                                                   sim_threshold)
-        # 去除分割合并与更新的交叉的情形，删更新
         update_mappings_copy = update_mappings[:]
         for split_merge in splits_merges:
             for update_change in update_mappings_copy:
                 if (split_merge[0][0] - update_change['src_start']) * (
                         split_merge[1][0] - update_change['added_start']) < 0 and update_change in update_mappings:
                     update_mappings.remove(update_change)
-        all_mappings = move_mappings[:]
-        for copy_mapping in copy_mappings:
-            for move_mapping in move_mappings:
-                if copy_mapping['src_start'] == move_mapping['src_start'] and copy_mapping['added_start'] == \
-                        move_mapping['added_start'] and copy_mapping['block_length'] == move_mapping['block_length']:
-                    break
-            else:
-                all_mappings.append(copy_mapping)
-        all_mappings = all_mappings + update_mappings
+        all_mappings = move_mappings + copy_mappings + update_mappings
         km_matches = []
         if all_mappings:
             km_matches, remaining_mappings = km_compute(all_mappings, src_lines_list, dest_lines_list,
@@ -1604,19 +1577,9 @@ def BDiff(src, dest, src_lines_list, dest_lines_list, diff_algorithm="Histogram"
                                                                     pure_cp_block_contain_punc)
                 km_matches = km_matches + additional_matches
             km_matches.sort(key=lambda x: x['src_start'])
-        edit_scripts = generate_edit_scripts_from_match(km_matches, diff_scripts, src_lines_copy, added_lines,
+        edit_script = generate_edit_scripts_from_match(km_matches, diff_script, src_lines_copy, added_lines,
                                                         splits_merges, hunks_copy, len(src_lines_list),
                                                         len(dest_lines_list))
-        return edit_scripts
-    edit_scripts = generate_edit_scripts_from_diff(diff_scripts)
-    return edit_scripts
-
-
-def BDiffFile(src, dest):
-    src_infile = open(src, 'r', encoding='utf-8')
-    dest_infile = open(dest, 'r', encoding='utf-8')
-    src_lines_list = src_infile.read().splitlines()
-    dest_lines_list = dest_infile.read().splitlines()
-    src_infile.close()
-    dest_infile.close()
-    pprint(BDiff(src, dest, src_lines_list, dest_lines_list))
+        return edit_script
+    edit_script = generate_edit_scripts_from_diff(diff_script)
+    return edit_script

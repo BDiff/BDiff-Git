@@ -65,7 +65,7 @@ def run(src, dest, output_name=''):
         dest_lines = f.read().splitlines()
     print("Python version:", sys.version)
     print("Python executable:", sys.executable)
-    edit_scripts = BDiff(os.path.abspath(src), os.path.abspath(dest), src_lines, dest_lines)
+    edit_scripts = BDiff(os.path.abspath(src), os.path.abspath(dest))
     print(edit_scripts)
     print(output_name)
     soup = get_html_template()
